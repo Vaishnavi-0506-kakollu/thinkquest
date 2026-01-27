@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ThinkQuest</title>
+
+<style>
+body{
+ margin:0;
+ font-family:Arial;
+ background:linear-gradient(270deg,#ff0080,#7928ca,#2afadf,#00ff87);
+ background-size:600% 600%;
+ animation:bg 6s infinite;
+ text-align:center;
+ color:white;
+}
+@keyframes bg{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+.card{
+ background:white;
+ color:black;
+ width:85%;
+ max-width:700px;
+ margin:80px auto;
+ padding:30px;
+ border-radius:25px;
+ box-shadow:0 15px 40px rgba(0,0,0,0.4);
+}
+button{
+ width:100%;
+ padding:16px;
+ margin:8px 0;
+ font-size:18px;
+ border-radius:18px;
+ border:none;
+ background:linear-gradient(45deg,#ff0080,#7928ca);
+ color:white;
+ cursor:pointer;
+}
+button:hover{transform:scale(1.05);}
+#points{
+ position:fixed;
+ top:15px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#ff9800;
+ padding:12px 25px;
+ border-radius:25px;
+ font-size:22px;
+ font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="points">⭐ Points: 0</div>
+<div class="card" id="screen"></div>
+
+<script>
+
+let points=0;
+let subject="",genre="",level="",qIndex=0;
+let questions=[];
+
+const stories={
+ Aptitude:{
+  Adventure:`
+Arjun was a curious boy who loved exploring the jungle near his village. One morning, he found a hidden path filled with wooden bridges crossing deep rivers. Each bridge had numbers carved on stones.
+
+The first bridge showed “3 + 5”. Arjun added carefully and got 8. The bridge slowly opened.
+
+The second bridge showed “10 – 4”. Arjun subtracted and got 6. Again the bridge opened.
+
+As he walked deeper, animals appeared to guide him. A monkey said, “If you double 6 quickly, what do you get?” Arjun thought fast and said 12.
+
+A parrot showed him “4 × 5”. Arjun multiplied and answered 20.
+
+Every step forward needed faster thinking. Soon the puzzles became harder. Some required combining addition and multiplication.
+
+For example, a cave door showed “(2 + 3) × 4”. Arjun solved step by step and got 20.
+
+As he continued, he realized mental shortcuts helped him reach faster.
+
+Finally he reached a golden treasure chest that required solving 100 – 45.
+
+When he answered 55, the chest opened.
+
+Inside were books teaching speed math tricks.
+
+Arjun realized aptitude was the real treasure that made life easier and faster.
+`,
+
+  Mystery:`
+Riya lived in Mathville where strange number symbols started appearing on doors every night.
+
+One door showed “7 + 6”. When Riya solved it as 13, the door opened.
+
+Inside she found a map pointing to another house.
+
+That house showed “20 – 8”. The answer 12 revealed another clue.
+
+Every clue was hidden inside math problems.
+
+Some were easy, like 4 + 4.
+
+Some were tricky, like 6 × 7.
+
+As she solved more, she noticed a pattern.
+
+Each answer formed a sequence guiding her across town.
+
+At the old clock tower she found a box with “(10 + 5) × 2”.
+
+She carefully solved it to get 30.
+
+Inside was a final map leading underground.
+
+The underground vault required “100 ÷ 4”.
+
+She answered 25.
+
+The vault opened revealing gold coins and books of mathematical mysteries.
+
+Riya learned that solving problems patiently uncovers hidden opportunities.
+`,
+
+  Fantasy:`
+Leo lived in a magical kingdom where numbers floated in the sky.
+
+Gates opened only when correct calculations were spoken.
+
+The first gate said “5 + 3”.
+
+Leo shouted 8 and the gate sparkled open.
+
+Dragons guarded castles that displayed puzzles like “9 × 3”.
+
+Leo answered 27 and the dragon stepped aside.
+
+Wizards trained Leo using fast calculations.
+
+They showed him “20 – 7”, “6 × 5”, “45 ÷ 9”.
+
+Each correct answer increased his magic strength.
+
+One giant gate showed a big spell:
+
+“(4 + 6) × 5 – 10”.
+
+Leo solved slowly and got 40.
+
+The kingdom celebrated his intelligence.
+
+He realized math was the true magic power.
+`
+ },
+
+ Reasoning:{
+  Adventure:`
+Maya arrived on an island where paths split in many directions.
+
+Each path had symbols and patterns.
+
+One sign showed 2, 4, 6, ?  
+
+She noticed the numbers increased by 2 and chose 8.
+
+The correct path opened.
+
+Another path showed animals: cat, dog, cow, ?
+
+She thought and picked another animal like horse.
+
+Wrong paths closed automatically.
+
+Some paths showed shapes repeating in patterns.
+
+Others showed odd one out puzzles.
+
+Maya had to think logically.
+
+Slowly she reached the mountain top where the crystal of wisdom was hidden.
+
+The final gate showed:
+
+1, 4, 9, 16, ?
+
+Maya recognized squares and answered 25.
+
+The crystal glowed and she became wiser.
+
+She learned reasoning helps choose correct paths in life.
+`,
+
+  Mystery:`
+Aarav found an old library with books that whispered riddles.
+
+One riddle said:
+
+“What comes after A, C, E?”
+
+He answered G.
+
+A bookshelf moved.
+
+Another riddle showed:
+
+Apple, Banana, Carrot, ?
+
+He realized carrot was different and chose it.
+
+Each solved riddle opened secret rooms.
+
+Some puzzles used number patterns.
+
+Others used logic.
+
+At the final door the riddle said:
+
+“Which does not belong: square, circle, triangle, red?”
+
+Aarav chose red.
+
+The treasure room opened.
+
+Inside were books of knowledge.
+
+He understood reasoning unlocks hidden doors of wisdom.
+`,
+
+  Fantasy:`
+Princess Anya ruled a kingdom attacked by shadow creatures.
+
+To defeat them she had to solve thinking spells.
+
+One spell showed:
+
+3, 6, 9, ?
+
+She answered 12.
+
+Another spell showed:
+
+Sun, Moon, Star, ?
+
+She said Sky.
+
+Each correct answer weakened shadows.
+
+Some spells required identifying odd items.
+
+Others required predicting sequences.
+
+The final shadow showed:
+
+1, 1, 2, 3, 5, ?
+
+Anya answered 8.
+
+The shadow vanished forever.
+
+Her kingdom was saved by intelligence.
+
+She learned reasoning is the strongest magic.
+`
+ }
+};
+const questionBank = {
+
+Aptitude:{
+
+Adventure:{
+Easy:[
+{q:"Arjun solved 3+5 on the first bridge. What is the answer?",opts:["7","8","9"],ans:"8",hint:"Add"},
+{q:"The second bridge showed 10-4. What did Arjun get?",opts:["5","6","7"],ans:"6",hint:"Subtract"},
+{q:"The monkey asked Arjun to double 6. What is it?",opts:["10","12","14"],ans:"12",hint:"Double"},
+{q:"The parrot showed 4×5. What is the result?",opts:["15","20","25"],ans:"20",hint:"Multiply"},
+{q:"The cave door showed 2+3. Answer?",opts:["4","5","6"],ans:"5",hint:"Add"}
+],
+Medium:[
+{q:"The spell was (2+3)×4. What is the answer?",opts:["16","20","24"],ans:"20",hint:"Add then multiply"},
+{q:"Treasure lock had 100-45. Answer?",opts:["50","55","60"],ans:"55",hint:"Subtract"},
+{q:"Another bridge showed 8×3. Result?",opts:["21","24","27"],ans:"24",hint:"Multiply"},
+{q:"Shortcut problem was 30-12. Answer?",opts:["16","18","20"],ans:"18",hint:"Subtract"},
+{q:"Gate puzzle was 5×6. What is it?",opts:["30","35","40"],ans:"30",hint:"Multiply"}
+],
+Hard:[
+{q:"Arjun solved (6+4)×5. Answer?",opts:["40","50","60"],ans:"50",hint:"Add then multiply"},
+{q:"Treasure code: 120÷4=?",opts:["25","30","35"],ans:"30",hint:"Divide"},
+{q:"Bridge showed (10+5)×3=?",opts:["40","45","50"],ans:"45",hint:"Multiply"},
+{q:"Shortcut math: 200-135=?",opts:["60","65","70"],ans:"65",hint:"Subtract"},
+{q:"Final door: 8×(4+2)=?",opts:["40","48","56"],ans:"48",hint:"Bracket first"}
+]
+},
+
+Mystery:{
+Easy:[
+{q:"First door had 7+6. Answer?",opts:["12","13","14"],ans:"13",hint:"Add"},
+{q:"Second clue was 20-8. What is it?",opts:["10","12","14"],ans:"12",hint:"Subtract"},
+{q:"Simple code was 4+4=?",opts:["6","8","10"],ans:"8",hint:"Add"},
+{q:"Next clue was 5+3=?",opts:["7","8","9"],ans:"8",hint:"Add"},
+{q:"Small lock had 6+2=?",opts:["7","8","9"],ans:"8",hint:"Add"}
+],
+Medium:[
+{q:"Big door showed 6×7. Answer?",opts:["40","42","44"],ans:"42",hint:"Multiply"},
+{q:"Clock tower puzzle: (10+5)×2=?",opts:["20","30","40"],ans:"30",hint:"Multiply"},
+{q:"Hidden box: 18-6=?",opts:["10","12","14"],ans:"12",hint:"Subtract"},
+{q:"Secret map: 9×4=?",opts:["32","36","40"],ans:"36",hint:"Multiply"},
+{q:"Vault step: 50-17=?",opts:["30","33","35"],ans:"33",hint:"Subtract"}
+],
+Hard:[
+{q:"Underground vault: 100÷4=?",opts:["20","25","30"],ans:"25",hint:"Divide"},
+{q:"Hidden code: (8+12)×3=?",opts:["50","60","70"],ans:"60",hint:"Multiply"},
+{q:"Puzzle lock: 144÷6=?",opts:["20","22","24"],ans:"24",hint:"Divide"},
+{q:"Final clue: 7×(10-2)=?",opts:["54","56","58"],ans:"56",hint:"Bracket"},
+{q:"Treasure gate: 200-156=?",opts:["42","44","46"],ans:"44",hint:"Subtract"}
+]
+},
+
+Fantasy:{
+Easy:[
+{q:"First gate was 5+3=?",opts:["7","8","9"],ans:"8",hint:"Add"},
+{q:"Dragon puzzle 9×3=?",opts:["24","27","30"],ans:"27",hint:"Multiply"},
+{q:"Wizard test 20-7=?",opts:["11","13","15"],ans:"13",hint:"Subtract"},
+{q:"Magic code 6×5=?",opts:["25","30","35"],ans:"30",hint:"Multiply"},
+{q:"Small gate 4+2=?",opts:["5","6","7"],ans:"6",hint:"Add"}
+],
+Medium:[
+{q:"Spell: (4+6)×5=?",opts:["40","50","60"],ans:"50",hint:"Multiply"},
+{q:"Tower math 45÷9=?",opts:["4","5","6"],ans:"5",hint:"Divide"},
+{q:"Magic lock 8×7=?",opts:["54","56","58"],ans:"56",hint:"Multiply"},
+{q:"Wizard code 30-14=?",opts:["14","16","18"],ans:"16",hint:"Subtract"},
+{q:"Spell gate 12×3=?",opts:["30","36","40"],ans:"36",hint:"Multiply"}
+],
+Hard:[
+{q:"Dragon spell (10+8)×4=?",opts:["68","72","76"],ans:"72",hint:"Multiply"},
+{q:"Castle code 180÷6=?",opts:["25","30","35"],ans:"30",hint:"Divide"},
+{q:"Magic formula 9×(8-2)=?",opts:["48","54","60"],ans:"54",hint:"Bracket"},
+{q:"Tower lock 200-128=?",opts:["70","72","74"],ans:"72",hint:"Subtract"},
+{q:"Final spell 15×(6-2)=?",opts:["50","60","70"],ans:"60",hint:"Multiply"}
+]
+}
+
+},
+
+Reasoning:{
+
+Adventure:{
+Easy:[
+{q:"Maya saw 2,4,6. What comes next?",opts:["7","8","9"],ans:"8",hint:"+2"},
+{q:"Which is bigger 3 or 5?",opts:["3","5"],ans:"5",hint:"Compare"},
+{q:"After A comes?",opts:["B","C"],ans:"B",hint:"Alphabet"},
+{q:"Choose smaller:1 or 9",opts:["1","9"],ans:"1",hint:"Compare"},
+{q:"Which is bigger 7 or 2?",opts:["7","2"],ans:"7",hint:"Compare"}
+],
+Medium:[
+{q:"Sequence 1,4,9. Next?",opts:["12","16","20"],ans:"16",hint:"Squares"},
+{q:"Odd one:2,4,6,9",opts:["2","4","6","9"],ans:"9",hint:"Odd"},
+{q:"Pattern 3,6,9 next?",opts:["12","15"],ans:"12",hint:"+3"},
+{q:"Odd:1,3,5,8",opts:["1","3","5","8"],ans:"8",hint:"Even"},
+{q:"Sequence 5,10,15 next?",opts:["20","25"],ans:"20",hint:"+5"}
+],
+Hard:[
+{q:"Series 2,6,12,20 next?",opts:["28","30","32"],ans:"30",hint:"Pattern"},
+{q:"Odd: square,circle,triangle,blue",opts:["square","circle","triangle","blue"],ans:"blue",hint:"Color"},
+{q:"Next 1,1,2,3,5 ?",opts:["7","8","9"],ans:"8",hint:"Fibonacci"},
+{q:"Pattern 100,50,25 next?",opts:["12.5","15","20"],ans:"12.5",hint:"Half"},
+{q:"Odd:dog,cat,cow,table",opts:["dog","cat","cow","table"],ans:"table",hint:"Not animal"}
+]
+},
+
+Mystery:{
+Easy:[
+{q:"After X comes?",opts:["Y","Z"],ans:"Y",hint:"Alphabet"},
+{q:"Smaller 2 or 8?",opts:["2","8"],ans:"2",hint:"Compare"},
+{q:"Bigger 6 or 1?",opts:["6","1"],ans:"6",hint:"Compare"},
+{q:"After M?",opts:["N","O"],ans:"N",hint:"Alphabet"},
+{q:"Smaller 3 or 7?",opts:["3","7"],ans:"3",hint:"Compare"}
+],
+Medium:[
+{q:"Next 10,20,30?",opts:["40","50"],ans:"40",hint:"+10"},
+{q:"Odd:5,7,9,12",opts:["5","7","9","12"],ans:"12",hint:"Even"},
+{q:"Next 1,4,9?",opts:["12","16"],ans:"16",hint:"Squares"},
+{q:"Pattern 2,6,10?",opts:["14","16"],ans:"14",hint:"+4"},
+{q:"Odd apple,banana,carrot,car",opts:["apple","banana","carrot","car"],ans:"car",hint:"Vehicle"}
+],
+Hard:[
+{q:"Series 3,9,27 next?",opts:["54","81","90"],ans:"81",hint:"×3"},
+{q:"Odd:pen,pencil,book,tree",opts:["pen","pencil","book","tree"],ans:"tree",hint:"Nature"},
+{q:"Next 2,4,8,16 ?",opts:["24","32","36"],ans:"32",hint:"×2"},
+{q:"Pattern 100,80,60 next?",opts:["40","50","70"],ans:"40",hint:"-20"},
+{q:"Odd:red,blue,green,cat",opts:["red","blue","green","cat"],ans:"cat",hint:"Animal"}
+]
+},
+
+Fantasy:{
+Easy:[
+{q:"After P comes?",opts:["Q","R"],ans:"Q",hint:"Alphabet"},
+{q:"Bigger 10 or 3?",opts:["10","3"],ans:"10",hint:"Compare"},
+{q:"Smaller 4 or 9?",opts:["4","9"],ans:"4",hint:"Compare"},
+{q:"After H?",opts:["I","J"],ans:"I",hint:"Alphabet"},
+{q:"Bigger 8 or 2?",opts:["8","2"],ans:"8",hint:"Compare"}
+],
+Medium:[
+{q:"Sequence 3,6,9 next?",opts:["12","15"],ans:"12",hint:"+3"},
+{q:"Odd 2,5,8,11",opts:["2","5","8","11"],ans:"11",hint:"Pattern"},
+{q:"Pattern 4,8,12 next?",opts:["16","20"],ans:"16",hint:"+4"},
+{q:"Odd 1,4,9,15",opts:["1","4","9","15"],ans:"15",hint:"Not square"},
+{q:"Series 5,15,25 next?",opts:["35","30"],ans:"35",hint:"+10"}
+],
+Hard:[
+{q:"Series 1,2,4,7,11 next?",opts:["15","16","18"],ans:"16",hint:"Add"},
+{q:"Odd sun,moon,star,chair",opts:["sun","moon","star","chair"],ans:"chair",hint:"Object"},
+{q:"Next 2,3,5,8,12 ?",opts:["17","18","20"],ans:"17",hint:"Pattern"},
+{q:"Pattern 81,27,9 next?",opts:["3","6","12"],ans:"3",hint:"÷3"},
+{q:"Odd gold,silver,copper,apple",opts:["gold","silver","copper","apple"],ans:"apple",hint:"Fruit"}
+]
+}
+
+}
+
+};
+
+
+const screen=document.getElementById("screen");
+
+function updatePoints(){
+ document.getElementById("points").innerText="⭐ Points: "+points;
+}
+
+function home(){
+ screen.innerHTML=`
+ <h2>Select Subject</h2>
+ <button onclick="chooseSub('Aptitude')">📐 Aptitude</button>
+ <button onclick="chooseSub('Reasoning')">🧠 Reasoning</button>
+ `;
+}
+
+function chooseSub(s){subject=s;genreScreen();}
+
+function genreScreen(){
+ screen.innerHTML="<h2>Select Genre</h2>";
+ ["Adventure","Mystery","Fantasy"].forEach(g=>{
+  screen.innerHTML+=`<button onclick="chooseGenre('${g}')">${g}</button>`;
+ });
+}
+
+function chooseGenre(g){genre=g;storyScreen();}
+
+function storyScreen(){
+ screen.innerHTML=`<h2>${genre} Story</h2><p>${stories[subject][genre]}</p>
+ <button onclick="levelScreen()">Go to Levels</button>`;
+}
+
+function levelScreen(){
+ screen.innerHTML=`<h2>Select Level</h2>
+ <button onclick="startQuiz('Easy')">Easy</button>
+ <button onclick="startQuiz('Medium')">Medium</button>
+ <button onclick="startQuiz('Hard')">Hard</button>`;
+
+}
+
+function startQuiz(lvl){
+ level=lvl;qIndex=0;
+ questions=questionBank[subject][genre][level];
+ showQuestion();
+}
+
+function showQuestion(){
+ if(qIndex>=questions.length){
+  screen.innerHTML=`<h2>🎉 Completed!</h2><button onclick="home()">Home</button>`;
+  return;
+ }
+ let q=questions[qIndex];
+ screen.innerHTML=`<h3>${level} Question ${qIndex+1}</h3><p>${q.q}</p>`;
+ q.opts.forEach(o=>{
+  screen.innerHTML+=`<button onclick="checkAnswer('${o}')">${o}</button>`;
+ });
+ screen.innerHTML+=`<button onclick="buyHint()">💡 Buy Hint (-5)</button>`;
+}
+
+function buyHint(){
+ if(points<5){alert("Not enough points");return;}
+ points-=5;updatePoints();
+ alert("Hint: "+questions[qIndex].hint);
+}
+
+function checkAnswer(a){
+ if(a===questions[qIndex].ans){points+=10;updatePoints();}
+ qIndex++;setTimeout(showQuestion,300);
+}
+
+home();
+
+</script>
+</body>
+</html>
